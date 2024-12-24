@@ -1,7 +1,7 @@
 name = "DDF"
 uuid = "312db325-ba92-4cc3-afbd-e88884efbc61"
 authors = ["Erik Schnetter <schnetter@gmail.com>"]
-version = "0.1.0"
+version = "0.1.1"
 
 [deps]
 AbstractPlotting = "537997a7-5e4e-5d89-9595-2241ea00577e"
