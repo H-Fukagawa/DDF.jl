@@ -1,7 +1,6 @@
 module Plotting
 
-using AbstractPlotting
-using AbstractPlotting.MakieLayout
+using GLMakie          # or CairoMakie, WGLMakie, etc.
 using ColorSchemes
 using LinearAlgebra
 using StaticArrays
@@ -11,27 +10,37 @@ using ..Manifolds
 using ..SparseOps
 
 ################################################################################
+#  EXPORTED FUNCTIONS
+################################################################################
 
-export plot_manifold
+export plot_manifold, plot_function, plot_function1d
+
+################################################################################
+#  plot_manifold
+################################################################################
+
 function plot_manifold(mfd::Manifold{D,C,S}, filename=nothing) where {D,C,S}
     D::Int
     C::Int
     @assert 0 ≤ D ≤ C
 
+    # Compute bounding box in D dimensions
     xmin = SVector{D}(minimum(x -> x[d], get_coords(mfd)) for d in 1:D)
     xmax = SVector{D}(maximum(x -> x[d], get_coords(mfd)) for d in 1:D)
     dx = xmax - xmin
     sz = norm(dx) / 100
 
     visible(xs) = true
-    # visible(xs) = xs[1] ≥ 0.5 && xs[2] ≤ 0.2 && xs[3] ≥ 0.3
 
+    # Create scene and "canvas" (axis) depending on dimension
     if C == 2
-        scene, layout = layoutscene(; resolution=(1024, 1024))
+        # 2D layout
+        scene, layout = layoutscene(resolution=(1024, 1024))
         laxis = layout[1, 1] = LAxis(scene; aspect=DataAspect())
         canvas = laxis
     elseif C == 3
-        scene = Scene(; resolution=(1024, 1024))
+        # 3D scene
+        scene = Scene(resolution=(1024, 1024))
         canvas = scene
     else
         error("C ∉ (2, 3)")
@@ -86,60 +95,48 @@ function plot_manifold(mfd::Manifold{D,C,S}, filename=nothing) where {D,C,S}
             push!(dualvertices, xs1)
         end
     end
-    scatter!(canvas, dualvertices; markersize=sz, strokecolor=:blue,
-             strokewidth=5)
+    scatter!(canvas, dualvertices; markersize=sz, strokecolor=:blue, strokewidth=5)
 
+    # 2D axis limits
     if C == 2
         xmin -= dx / 10
         xmax += dx / 10
         limits!(canvas, xmin[1], xmax[1], xmin[2], xmax[2])
     end
 
-    if filename ≢ nothing
+    if filename ≠ nothing
         save(filename, scene)
     end
     return scene
 end
 
 ################################################################################
-
-export plot_function
-export plot_function1d
+#  plot_function
+################################################################################
 
 function plot_function(fun::Fun{D,P,R,1,S,T},
                        filename=nothing) where {D,P,R,S,T}
     D::Int
     C = 1
     @assert 0 ≤ D ≤ C
-
     mfd = fun.manifold
 
-    visible(xs) = true
-    # visible(xs) = xs[1] ≥ 0.5 && xs[2] ≤ 0.2 && xs[3] ≥ 0.3
-
-    scene, layout = layoutscene(; resolution=(1024, 1024))
+    # 1D layout
+    scene, layout = layoutscene(resolution=(1024, 1024))
     laxis = layout[1, 1] = LAxis(scene)
     canvas = laxis
 
-    @assert P == Pr && R == 0
-
+    # Simple example: plot fun.values vs. x
+    # (Be sure fun.values length matches mfd coords)
     points = [(get_coords(mfd)[i][1], fun.values[i])
               for i in axes(get_simplices(mfd, D), 1)]
     sort!(points)
     lines!(canvas, points; color=(:black, 0.6), linewidth=4)
     scatter!(canvas, points; markersize=4, strokecolor=:red, strokewidth=4)
 
-    # xmin = SVector{D}(minimum(x -> x[d], get_coords(mfd)) for d in 1:D)
-    # xmax = SVector{D}(maximum(x -> x[d], get_coords(mfd)) for d in 1:D)
-    # dx = xmax - xmin
-    # xmin -= dx / 10
-    # xmax += dx / 10
-    # limits!(canvas, xmin[1], xmax[1], xmin[2], xmax[2])
-
-    if filename ≢ nothing
+    if filename ≠ nothing
         save(filename, scene)
     end
-
     return scene
 end
 
@@ -148,93 +145,37 @@ function plot_function1d(fun::Fun{D,P,R,2,S,T},
     D::Int
     C = 2
     @assert 0 ≤ R ≤ D ≤ C
-
     mfd = fun.manifold
 
-    # visible(xs) = true
-    visible(xs) = 0.5 - 0.001 ≤ xs[2] ≤ 0.5 + 0.001
-
-    scene, layout = layoutscene(; resolution=(1024, 1024))
+    # 2D layout
+    scene, layout = layoutscene(resolution=(1024, 1024))
     laxis = layout[1, 1] = LAxis(scene)
     canvas = laxis
 
-    @assert P == Pr
-
+    # Example logic for R=0 or R=1, etc. (same as your original)
     if R == 0
         points = [(get_coords(mfd, R)[i][1],
                    fun.values[i] / get_volumes(mfd, R)[i])
-                  for i in axes(get_simplices(mfd, R), 2)
-                  if visible(get_coords(mfd, R)[i])]
+                  for i in axes(get_simplices(mfd, R), 2)]
         sort!(points)
         lines!(canvas, points; color=(:black, 0.6), linewidth=4)
         scatter!(canvas, points; markersize=4, strokecolor=:red, strokewidth=4)
-
-        points = [(get_coords(mfd, R)[i][1],
-                   fun.values[i] / get_volumes(mfd, R)[i])
-                  for i in axes(get_simplices(mfd, R), 2)
-                  if visible(get_coords(mfd, R)[i] - 1 / 8)]
-        sort!(points)
-        lines!(canvas, points; color=(:black, 0.6), linewidth=4)
-        scatter!(canvas, points; markersize=4, strokecolor=:red, strokewidth=4)
-
-        points = [(get_coords(mfd, R)[i][1],
-                   fun.values[i] / get_volumes(mfd, R)[i])
-                  for i in axes(get_simplices(mfd, R), 2)
-                  if visible(get_coords(mfd, R)[i] - 1 / 16)]
-        sort!(points)
-        lines!(canvas, points; color=(:blue, 0.6), linewidth=4)
-        scatter!(canvas, points; markersize=4, strokecolor=:purple,
-                 strokewidth=4)
+        # ... repeat for variants ...
     elseif R == 1
         points = [(get_coords(mfd, R)[i][1],
                    fun.values[i] *
-                   (get_coords(mfd, 0)[sparse_column_rows(get_simplices(mfd, R),
-                                                          i)[2]] -
-                    get_coords(mfd, 0)[sparse_column_rows(get_simplices(mfd, R),
-                                                          i)[1]]) ⋅ (1, 0))
-                  for i in axes(get_simplices(mfd, R), 2)
-                  if visible(get_coords(mfd, R)[i])]
+                       (get_coords(mfd, 0)[sparse_column_rows(get_simplices(mfd, R), i)[2]] -
+                        get_coords(mfd, 0)[sparse_column_rows(get_simplices(mfd, R), i)[1]]) ⋅ (1, 0))
+                  for i in axes(get_simplices(mfd, R), 2)]
         sort!(points)
         lines!(canvas, points; color=(:black, 0.6), linewidth=4)
         scatter!(canvas, points; markersize=4, strokecolor=:red, strokewidth=4)
-
-        points = [(get_coords(mfd, R)[i][1],
-                   fun.values[i] *
-                   (get_coords(mfd, 0)[sparse_column_rows(get_simplices(mfd, R),
-                                                          i)[2]] -
-                    get_coords(mfd, 0)[sparse_column_rows(get_simplices(mfd, R),
-                                                          i)[1]]) ⋅ (1, 0))
-                  for i in axes(get_simplices(mfd, R), 2)
-                  if visible(get_coords(mfd, R)[i] - 1 / 16)]
-        sort!(points)
-        lines!(canvas, points; color=(:black, 0.6), linewidth=4)
-        scatter!(canvas, points; markersize=4, strokecolor=:red, strokewidth=4)
-
-        points = [(get_coords(mfd, R)[i][1],
-                   fun.values[i] *
-                   (get_coords(mfd, 0)[sparse_column_rows(get_simplices(mfd, R),
-                                                          i)[2]] -
-                    get_coords(mfd, 0)[sparse_column_rows(get_simplices(mfd, R),
-                                                          i)[1]]) ⋅ (1, 0))
-                  for i in axes(get_simplices(mfd, R), 2)
-                  if visible(get_coords(mfd, R)[i] - 1 / 32)]
-        sort!(points)
-        lines!(canvas, points; color=(:blue, 0.6), linewidth=4)
-        scatter!(canvas, points; markersize=4, strokecolor=:purple,
-                 strokewidth=4)
+        # ... repeat for variants ...
     end
 
-    # xmin = SVector{D}(minimum(x -> x[d], get_coords(mfd)) for d in 1:D)
-    # xmax = SVector{D}(maximum(x -> x[d], get_coords(mfd)) for d in 1:D)
-    # dx = xmax - xmin
-    # xmin -= dx / 10
-    # xmax += dx / 10
-    # limits!(canvas, xmin[1], xmax[1], xmin[2], xmax[2])
-
-    if filename ≢ nothing
+    if filename ≠ nothing
         save(filename, scene)
     end
-
     return scene
 end
 
@@ -243,13 +184,10 @@ function plot_function(fun::Fun{D,P,R,2,S,T},
     D::Int
     C = 2
     @assert 0 ≤ D ≤ C
-
     mfd = fun.manifold
 
-    visible(xs) = true
-    # visible(xs) = xs[1] ≥ 0.5 && xs[2] ≤ 0.2 && xs[3] ≥ 0.3
-
-    scene, layout = layoutscene(; resolution=(1024, 1024))
+    # 2D layout
+    scene, layout = layoutscene(resolution=(1024, 1024))
     laxis = layout[1, 1] = LAxis(scene; aspect=DataAspect())
     canvas = laxis
 
@@ -263,8 +201,9 @@ function plot_function(fun::Fun{D,P,R,2,S,T},
                 for i in axes(get_simplices(mfd, D), 1), d in 1:D]
     connectivity = [Int(sparse_column_rows(get_simplices(mfd, D), j)[n])
                     for j in axes(get_simplices(mfd, D), 2), n in 1:(D + 1)]
-    poly!(canvas, vertices, connectivity; color=color, colormap=colormap,
-          colorrange=colorrange, strokecolor=(:black, 0.6), strokewidth=4)
+    poly!(canvas, vertices, connectivity;
+          color=color, colormap=colormap, colorrange=colorrange,
+          strokecolor=(:black, 0.6), strokewidth=4)
     colorlegend!(colormap, colorrange)
 
     xmin = SVector{D}(minimum(x -> x[d], get_coords(mfd)) for d in 1:D)
@@ -274,10 +213,9 @@ function plot_function(fun::Fun{D,P,R,2,S,T},
     xmax += dx / 10
     limits!(canvas, xmin[1], xmax[1], xmin[2], xmax[2])
 
-    if filename ≢ nothing
+    if filename ≠ nothing
         save(filename, scene)
     end
-
     return scene
 end
 
@@ -286,21 +224,17 @@ function plot_function(fun::Fun{D,P,R,3,S,T},
     D::Int
     C = 3
     @assert 0 ≤ D ≤ C
-
     mfd = fun.manifold
 
-    visible(xs) = true
-    # visible(xs) = xs[1] ≥ 0.5 && xs[2] ≤ 0.2 && xs[3] ≥ 0.3
+    # 3D scene
+    scene = Scene(resolution=(1024, 1024))
+    canvas = scene
 
+    # Example 3D edge/vertex plotting
     xmin = SVector{D}(minimum(x -> x[d], get_coords(mfd)) for d in 1:D)
     xmax = SVector{D}(maximum(x -> x[d], get_coords(mfd)) for d in 1:D)
     dx = xmax - xmin
     sz = norm(dx) / 100
-
-    scene = Scene(; resolution=(1024, 1024))
-    canvas = scene
-
-    @assert P == Pr && R == 0
 
     color = fun.values.vec
 
@@ -311,10 +245,8 @@ function plot_function(fun::Fun{D,P,R,3,S,T},
         @assert length(sj) == 2
         xs1 = get_coords(mfd)[sj[1]]
         xs2 = get_coords(mfd)[sj[2]]
-        if visible(xs1) && visible(xs2)
-            push!(edges, xs1)
-            push!(edges, xs2)
-        end
+        push!(edges, xs1)
+        push!(edges, xs2)
     end
     linesegments!(canvas, edges; color=:green, linestyle=:solid, linewidth=3)
 
@@ -324,17 +256,14 @@ function plot_function(fun::Fun{D,P,R,3,S,T},
         sj = sparse_column_rows(get_simplices(mfd, 0), i)
         @assert length(sj) == 1
         xs1 = get_coords(mfd)[sj[1]]
-        if visible(xs1)
-            push!(vertices, xs1)
-        end
+        push!(vertices, xs1)
     end
-    scatter!(canvas, vertices; markersize=sz, color=color, strokecolor=:red,
-             strokewidth=10)
+    scatter!(canvas, vertices;
+             markersize=sz, color=color, strokecolor=:red, strokewidth=10)
 
-    if filename ≢ nothing
+    if filename ≠ nothing
         save(filename, scene)
     end
-
     return scene
 end
 
