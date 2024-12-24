@@ -259,7 +259,7 @@ function Base.show(io::IO, A::SparseOp{Tag1,Tag2,T}) where {Tag1,Tag2,T}
     Aop′ = A.op
     for j in 1:size(Aop′, 2)
         print(io, "  [$j]: ")
-        if !T.mutable && sizeof(T) == 0
+        if isbits(T) && sizeof(T) == 0
             # Immutable types with size 0 have always the same value,
             # hence we don't need to output it
             print(io, "[")
