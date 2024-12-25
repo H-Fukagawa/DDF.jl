@@ -78,17 +78,15 @@ coordinates = [
         d in 1:D
 ]
 
-
-connectivity = [SVector{D + 1}(i
-                               for i in sparse_column_rows(mfd.simplices[D], j))
-                for j in 1:size(mfd.simplices[D], 2)];
-
 connectivity = [
            SVector{D + 1}(
                Int(i) for i in sparse_column_rows(get_simplices(mfd, D), ID{D}(j))
            )
            for j in 1:size(get_simplices(mfd, D), 2)
        ]
+
+connectivity = [connectivity[i][n]
+                for i in 1:nsimplices(mfd, D), n in 1:(D + 1)]
 
 color = f̃.values;
 
