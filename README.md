@@ -68,7 +68,6 @@ f̃ = sample(Fun{D,Pr,0,D,Float64,Float64}, f, mfd)
 
 Plot the scalar function:
 ```Julia
-using AbstractPlotting
 using GLMakie
 using StaticArrays
 
