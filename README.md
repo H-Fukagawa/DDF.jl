@@ -88,12 +88,14 @@ connectivity = [
 connectivity = [connectivity[i][n]
                 for i in 1:nsimplices(mfd, D), n in 1:(D + 1)]
 
-color = f̃.values;
+color = f̃.values.vec;
 
 scene = Scene()
 poly!(scene, coordinates, connectivity, color=color, strokecolor=(:black, 0.6),
       strokewidth=4)
+save("output.png", scene)
 scale!(scene, 1, 1)
+
 
 # using Makie
 # Makie.save("simplex.png", scene; resolution=(350,300))
