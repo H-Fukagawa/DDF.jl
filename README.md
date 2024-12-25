@@ -72,12 +72,24 @@ using AbstractPlotting
 using GLMakie
 using StaticArrays
 
-coordinates = [mfd.coords[0][i][d] for i in 1:nsimplices(mfd, 0), d in 1:D]
+coordinates = [
+    get_coords(mfd, 0)[ID{0}(i)][d]
+    for i in 1:nsimplices(mfd, 0),
+        d in 1:D
+]
+
+
 connectivity = [SVector{D + 1}(i
                                for i in sparse_column_rows(mfd.simplices[D], j))
                 for j in 1:size(mfd.simplices[D], 2)];
-connectivity = [connectivity[i][n]
-                for i in 1:nsimplices(mfd, D), n in 1:(D + 1)]
+
+connectivity = [
+           SVector{D + 1}(
+               Int(i) for i in sparse_column_rows(get_simplices(mfd, D), ID{D}(j))
+           )
+           for j in 1:size(get_simplices(mfd, D), 2)
+       ]
+
 color = f̃.values;
 
 scene = Scene()
