@@ -2,7 +2,7 @@ module Plotting
 
 # using AbstractPlotting
 # using AbstractPlotting.MakieLayout
-using GLMakie # CairoMakie or GLMakie, WGLMakie, etc.
+using Makie # CairoMakie or GLMakie, WGLMakie, etc.
 using ColorSchemes
 using LinearAlgebra
 using StaticArrays
