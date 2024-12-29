@@ -29,7 +29,7 @@ function plot_manifold(mfd::Manifold{D,C,S}, filename=nothing) where {D,C,S}
 
     if C == 2
         scene, layout = layoutscene(; resolution=(1024, 1024))
-        laxis = layout[1, 1] = LAxis(scene; aspect=DataAspect())
+        laxis = layout[1, 1] = Axis(scene; aspect=DataAspect())
         canvas = laxis
     elseif C == 3
         scene = Scene(; resolution=(1024, 1024))
