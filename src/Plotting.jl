@@ -119,7 +119,7 @@ function plot_function(fun::Fun{D,P,R,1,S,T},
     # visible(xs) = xs[1] ≥ 0.5 && xs[2] ≤ 0.2 && xs[3] ≥ 0.3
 
     scene, layout = layoutscene(; resolution=(1024, 1024))
-    laxis = layout[1, 1] = LAxis(scene)
+    laxis = layout[1, 1] = Axis(scene)
     canvas = laxis
 
     @assert P == Pr && R == 0
@@ -156,7 +156,7 @@ function plot_function1d(fun::Fun{D,P,R,2,S,T},
     visible(xs) = 0.5 - 0.001 ≤ xs[2] ≤ 0.5 + 0.001
 
     scene, layout = layoutscene(; resolution=(1024, 1024))
-    laxis = layout[1, 1] = LAxis(scene)
+    laxis = layout[1, 1] = Axis(scene)
     canvas = laxis
 
     @assert P == Pr
@@ -251,7 +251,7 @@ function plot_function(fun::Fun{D,P,R,2,S,T},
     # visible(xs) = xs[1] ≥ 0.5 && xs[2] ≤ 0.2 && xs[3] ≥ 0.3
 
     scene, layout = layoutscene(; resolution=(1024, 1024))
-    laxis = layout[1, 1] = LAxis(scene; aspect=DataAspect())
+    laxis = layout[1, 1] = Axis(scene; aspect=DataAspect())
     canvas = laxis
 
     @assert P == Pr && R == 0
