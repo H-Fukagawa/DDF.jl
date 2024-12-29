@@ -14,6 +14,7 @@ using ..SparseOps
 ################################################################################
 
 export plot_manifold
+fig = Figure()
 function plot_manifold(mfd::Manifold{D,C,S}, filename=nothing) where {D,C,S}
     D::Int
     C::Int
@@ -29,7 +30,7 @@ function plot_manifold(mfd::Manifold{D,C,S}, filename=nothing) where {D,C,S}
 
     if C == 2
         scene, layout = layoutscene(; resolution=(1024, 1024))
-        laxis = layout[1, 1] = Axis(scene; aspect=DataAspect())
+        laxis = fig[1, 1] = Axis(scene; aspect=DataAspect())
         canvas = laxis
     elseif C == 3
         scene = Scene(; resolution=(1024, 1024))
@@ -119,7 +120,7 @@ function plot_function(fun::Fun{D,P,R,1,S,T},
     # visible(xs) = xs[1] ≥ 0.5 && xs[2] ≤ 0.2 && xs[3] ≥ 0.3
 
     scene, layout = layoutscene(; resolution=(1024, 1024))
-    laxis = layout[1, 1] = Axis(scene)
+    laxis = fig[1, 1] = Axis(scene)
     canvas = laxis
 
     @assert P == Pr && R == 0
@@ -156,7 +157,7 @@ function plot_function1d(fun::Fun{D,P,R,2,S,T},
     visible(xs) = 0.5 - 0.001 ≤ xs[2] ≤ 0.5 + 0.001
 
     scene, layout = layoutscene(; resolution=(1024, 1024))
-    laxis = layout[1, 1] = Axis(scene)
+    laxis = fig[1, 1] = Axis(scene)
     canvas = laxis
 
     @assert P == Pr
@@ -251,7 +252,7 @@ function plot_function(fun::Fun{D,P,R,2,S,T},
     # visible(xs) = xs[1] ≥ 0.5 && xs[2] ≤ 0.2 && xs[3] ≥ 0.3
 
     scene, layout = layoutscene(; resolution=(1024, 1024))
-    laxis = layout[1, 1] = Axis(scene; aspect=DataAspect())
+    laxis = fig[1, 1] = Axis(scene; aspect=DataAspect())
     canvas = laxis
 
     @assert P == Pr && R == 0
@@ -266,7 +267,7 @@ function plot_function(fun::Fun{D,P,R,2,S,T},
                     for j in axes(get_simplices(mfd, D), 2), n in 1:(D + 1)]
     poly!(canvas, vertices, connectivity; color=color, colormap=colormap,
           colorrange=colorrange, strokecolor=(:black, 0.6), strokewidth=4)
-    Colorbar(laxis, colormap=colormap, clims=colorrange)
+    Colorbar(fig[1,2],, colormap=colormap, clims=colorrange)
 
 
     xmin = SVector{D}(minimum(x -> x[d], get_coords(mfd)) for d in 1:D)
