@@ -5,6 +5,7 @@ version = "0.1.1"
 
 [deps]
 # AbstractPlotting = "537997a7-5e4e-5d89-9595-2241ea00577e"
+Makie = "ee78f7c6-11fb-53f2-987a-cfe4a2b5a57a"
 Bernstein = "e9b0fb4c-9cb7-4f61-9c14-701a41c684d7"
 ColorSchemes = "35d6a980-a343-548e-a6ea-1d62b119f2f4"
 Combinatorics = "861a8166-3701-5b0c-9a16-15d98fcdc6aa"
