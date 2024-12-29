@@ -266,7 +266,8 @@ function plot_function(fun::Fun{D,P,R,2,S,T},
                     for j in axes(get_simplices(mfd, D), 2), n in 1:(D + 1)]
     poly!(canvas, vertices, connectivity; color=color, colormap=colormap,
           colorrange=colorrange, strokecolor=(:black, 0.6), strokewidth=4)
-    colorlegend!(colormap, colorrange)
+    colorbar!(laxis, colormap=colormap, clims=colorrange)
+
 
     xmin = SVector{D}(minimum(x -> x[d], get_coords(mfd)) for d in 1:D)
     xmax = SVector{D}(maximum(x -> x[d], get_coords(mfd)) for d in 1:D)
