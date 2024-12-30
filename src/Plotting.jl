@@ -301,7 +301,8 @@ function plot_function(fun::Fun{D,P,R,3,S,T},
     sz = norm(dx) / 100
 
     scene = Figure(resolution = (1024, 1024)) # Scene(; resolution=(1024, 1024))
-    canvas = scene
+    laxis = fig[1, 1] = Axis(scene)
+    canvas = laxis
 
     @assert P == Pr && R == 0
 
