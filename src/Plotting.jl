@@ -300,7 +300,7 @@ function plot_function(fun::Fun{D,P,R,3,S,T},
     dx = xmax - xmin
     sz = norm(dx) / 100
 
-    scene = Scene(; resolution=(1024, 1024))
+    scene = Figure(resolution = (1024, 1024)) # Scene(; resolution=(1024, 1024))
     canvas = scene
 
     @assert P == Pr && R == 0
